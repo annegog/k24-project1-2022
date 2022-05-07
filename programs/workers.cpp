@@ -12,30 +12,56 @@
 #include <sys/ipc.h>
 #include <error.h>
 
-#define MSGSIZE 65
+#define MAXBUFF 1024
+#define FIFO1   "/tmp/fifo-manager-workers.1"
+#define FIFO2   "/tmp/fifo-manager-workers.2"
 
-char* fifo = "manager_workers";
+main (int argc, char** argv) {
+    int fd, n;    
+    int readfd, writefd;
 
-main (int argc, char* argv[]) {
-    int fd, i, nwrite ;
-    char msgbuf[MSGSIZE +1];
-    
-    if(argc >2) {
-        printf("Usage: receive the message\n") ;
-        exit(1) ;
+    char buff[MAXBUFF];
+    char errmesg[256];
+
+    //////////////////////
+
+    if ( (readfd = open(FIFO1, O_RDONLY))  < 0){
+        perror("worker: can't open read fifo");
     }
-    
-    if( ( fd = open(fifo, O_RDONLY )) < 0) {
-        perror ("fifo open problem !");
-        exit(3);
+ 
+    if ( (writefd = open(FIFO2, O_WRONLY))  < 0){
+        perror("worker: can't open write fifo");
     }
-    for (;;) {
-        if( read(fd, msgbuf, MSGSIZE +1) < 0) {
-            perror("problem in reading !");
-            exit(5);
+
+    // Read the filename from the IPC descriptor.
+    if ((n= read(readfd, buff, MAXBUFF)) <= 0) {
+        perror("w: filename read error ");
+    }
+
+    buff[n] = '\0';  // null terminate filename 
+
+    if( (fd = open(buff, 0)) <0) {
+        /* Error. Format an error message and send it
+        *  back to the client */
+        sprintf(errmesg, ":can't open, %s\n", buff);
+        strcat(buff, errmesg);
+        
+        n = strlen(buff);
+        if (write(writefd, buff, n) != n)  {
+            perror("w: errmesg write error");
         }
-        printf("\nMessage Received: %s\n", msgbuf);
-        fflush(stdout);
+    } 
+    else{
+    /* Read the data from the file and write to
+     * the IPC descriptor. */
+
+        while ( (n = read(fd, buff, MAXBUFF)) > 0)
+            if (write(writefd, buff, n) != n) {
+                perror("w: data write error");
+            }
+        if (n < 0) {
+        perror("w: read error");
+        }
     }
 
 }
