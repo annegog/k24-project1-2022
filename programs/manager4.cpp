@@ -60,12 +60,13 @@ int main(){
     // // initialize them to 0. 
     // // we want to block some processes
     // sem_t *semaphore2 = sem_open(SEM2_NAME, O_CREAT | O_EXCL, SEM_PERMS, 0);
-    // sem_t *semaphore3 = sem_open(SEM3_NAME, O_CREAT | O_EXCL, SEM_PERMS, 0);
+    //sem_t *semaphore3 = sem_open(SEM3_NAME, O_CREAT | O_EXCL, SEM_PERMS, 0);
 
     // sem_close(semaphore);
     // sem_unlink(SEM_NAME);
     // sem_close(semaphore2);
     // sem_unlink(SEM2_NAME);
+    
     // sem_close(semaphore3);
     // sem_unlink(SEM3_NAME);
 
@@ -100,7 +101,7 @@ int main(){
         dup2(fd[WRITE], 1); // the (new)standrad output 
                             // => goes to the input of manager
         if( execl("/usr/bin/inotifywait","usr/bin/inotifywait", "-m", "-e", "create", "-e", "moved_to",dir_to_watch ,NULL) < 0){
-            perror("execlp (listener) failed");
+            perror("execl-(listener) failed");
             exit(EXIT_FAILURE);
         }
 
@@ -116,8 +117,6 @@ int main(){
 
             signal(SIGCHLD, sig_handler);
 
-            printf("hellooooooo\n");
-
             if( queue_workers.empty() || not_available(queue_workers.front()) ){
                 // make a worker
                 printf("make a new worker\n");
@@ -126,13 +125,15 @@ int main(){
                     perror ("fork faild"); 
                     exit(EXIT_FAILURE);
                 }
-                if(child > 0){     // manager
-                    char fifo[] = "/tmp/fifo";
 
-                    if( (mkfifo(fifo, 0666) < 0) && (errno != EEXIST) ) {
+                if(child > 0){     // manager
+                    //char fifo[] = "/tmp/fifo";
+                    printf("eeelaaa\n");
+                    if( (mkfifo(FIFO1, 0666) < 0) && (errno != EEXIST) ) {
                         perror("can't make fifo");
                     }
-                    if(fd1 =open(fifo,O_WRONLY) > 0){
+                    printf("eeelaaa 2\n");
+                    if((fd1 = open(FIFO1,O_WRONLY)) > 0){
                         perror("manager: can't open fifo");
                     }
                     printf("manager write to pipe..\n");
@@ -141,25 +142,49 @@ int main(){
                     }
                     // pushing the worker in the queue
                     queue_workers.push({getpid(),fd1});
+                    
+                    printf("elaaa 3\n");
                 }
                 if(child == 0){
-                    printf("manager's child = worker\n");
-                    
+                    printf("manager's child = worker %ld\n", (long)getpid());
                     if(execl(WORKERS, WORKERS, NULL) < 0){
                         perror("execl failed");
                         exit(EXIT_FAILURE);
                     }
-                } 
-
-
+                }
+            }
+            else if(!not_available(queue_workers.front())){
+                // if worker is stoped. 
+                // add to queue
+                while(waitpid(-1,NULL,WNOHANG | WUNTRACED) > 0){ 
+                    printf("manager write to pipe..\n");
+                    if(write(fd1, buff, n) != n ){
+                        perror("manager: filename write error");
+                    }
+                    queue_workers.push({getpid(),fd1});
+                }
+            }
+            else{
+                // ???????????????
             }
 
+        //end of while
         }   
 
     }
 
 
+    // while(1){
+    //     char* p;
+    //     fscanf(stdin,"%s",p);
+    //     if(strcmp(p,"exit"))
+    //         break;
+    // }
+
 }
+
+    
+
 
 
 bool not_available(pair<pid_t, int> q){
@@ -167,4 +192,8 @@ bool not_available(pair<pid_t, int> q){
     if(waitpid(f, NULL, WNOHANG) == 0)
         return true;
     return false;
+}
+
+pid_t retern_child(pair<pid_t, int> q){
+    return q.first;
 }
