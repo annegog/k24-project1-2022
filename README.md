@@ -8,3 +8,7 @@
 
 -------------------------------------------------
 __further observations__
+
+
+-----------------
+// g++ -g -Wall manad2.cpp -o manager -lpthread

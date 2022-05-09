@@ -67,9 +67,7 @@ int main(){
 
     int fd1, fd2;
     int n;
-
-    int take_from_the_listener = 1;
-
+    
     char* dir_to_watch = "./new_files";
     
     queue <pair<pid_t, int> > queue_workers;
@@ -102,7 +100,7 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-    //////////////////////////////////////////////////////////////////
+    ///////////////////////// Listener and Manager /////////////////////////////
 
 
     //// ----------- pipe for listener and manager -----------------
@@ -112,8 +110,8 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-    /// ----------------- making the listener ------------------
-
+    // -----------------------------------------------------
+    
     if( (pid = fork()) < 0 ){
         perror ("fork faild"); 
         exit(EXIT_FAILURE);
@@ -122,11 +120,10 @@ int main(){
         close(fd[READ]);
         dup2(fd[WRITE], 1); // the (new)standrad output 
                             // => goes to the input of manager  
-        while(take_from_the_listener){
-            if( execl("/usr/bin/inotifywait","inotifywait -m -e create -e moved_to", dir_to_watch ,NULL) < 0){
-                perror("execlp (listener) failed");
-                exit(EXIT_FAILURE);
-            }
+    
+        if( execl("/usr/bin/inotifywait","inotifywait -m -e create -e moved_to", dir_to_watch ,NULL) < 0){
+            perror("execlp (listener) failed");
+            exit(EXIT_FAILURE);
         }
     }
     if(pid > 0){    // parent and reacever
@@ -135,11 +132,10 @@ int main(){
 
         printf("manager- received a filename from the listener!\n");
 
-        // n = read(fd[READ], buff, BUFSIZ);
-        // printf("%s", buff);
-        //take_from_the_listener = 0;
-        
+        read(fd[READ], buff, BUFSIZ);
+        printf("%s", buff);   
     }
+    
     
     /////////////////// MANAGER-WORKERS CONNECTION ///////////////////
     fprintf(stdout,"M: 1\n");
@@ -164,14 +160,13 @@ int main(){
     if( (fd1 = open(FIFO1, O_WRONLY)) <0){
         perror("m: fifo1 open error");
         exit(1);
-    }
+    }fprintf(stdout,"M: 4\n");
     if( (fd2 = open(FIFO2, O_WRONLY)) <0){
         perror("m: fifo1 open error");
         exit(1);
     }
     
-    fprintf(stdout,"M: 4\n");
-
+    
     signal(SIGCHLD, sig_handler);
 
     // if the queue is empty or there is no available worker
@@ -209,10 +204,17 @@ int main(){
                   
     }
             
-    while(waitpid(-1,NULL,WNOHANG | WUNTRACED) > 0){ 
+    //while(waitpid(-1,NULL,WNOHANG | WUNTRACED) > 0){ 
         /*add to queue */ 
-    }
+    //}
         
+    while(1){
+        char* p;
+        fscanf(stdin,"%s",p);
+        if(strcmp(p,"exit"))
+            break;
+    }
+
 }
 
 
