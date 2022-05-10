@@ -94,18 +94,18 @@ int main(int argc, char **argv){
             
             ////---------------------- waitpid(-1, &status, WNOHANG | WUNTRACED)
             
-            if(!queue_workers.empty() && signal(SIGCHLD, sig_handler)){
-                // an yparxei diathesimow worker 
-                // prepei na parw ayton = den ftiaxnw kainoyrgio worker
+            // if(!queue_workers.empty() && signal(SIGCHLD, sig_handler)){
+            //     // an yparxei diathesimow worker 
+            //     // prepei na parw ayton = den ftiaxnw kainoyrgio worker
                 
-                signal(SIGCONT, child_handler);
+            //     signal(SIGCONT, child_handler);
 
-                // if((fd1 = open(,O_WRONLY)) < 0){
-                //     perror("manager: can't open pipe");
-                // }
+            //     // if((fd1 = open(,O_WRONLY)) < 0){
+            //     //     perror("manager: can't open pipe");
+            //     // }
 
-            }
-            else{
+            // }
+            // else{
                 printf("We are making a new worker\n");
 
                 if( (child = fork()) < 0 ){ 
@@ -130,13 +130,11 @@ int main(int argc, char **argv){
 
                     // manager is opening the pipe so 
                     // so he can send the filename to the worker.
+                    
                     printf("manager is opening the pipe\n");
-                    printf("helloooooooo\n");
-                    printf("helloooooooo 2\n");
                     if((fd1 = open(pipename,O_WRONLY)) < 0){
                         perror("manager: can't open pipe");
-                    }
-                    printf("manager: pipe is now open\n");
+                    }                    
                 }
                 if(child == 0){
                     printf("----------------------- Manager's worker -------------------\n");
@@ -145,12 +143,12 @@ int main(int argc, char **argv){
                     queue_workers.push({getpid(), pipename});
                     
                     printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
-                    // if(execl(WORKERS, WORKERS, pipename , NULL) < 0){
-                    //     perror("execl failed");
-                    //     exit(EXIT_FAILURE);
-                    // }
+                    if(execl(WORKERS, WORKERS, pipename , NULL) < 0){
+                        perror("execl failed");
+                        exit(EXIT_FAILURE);
+                    }
                 }
-            }
+            // }
                            
         }            
 

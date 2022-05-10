@@ -36,13 +36,13 @@ int main(int argc, char **argv){
     // char buff[BUFSIZ];
     char* pipename = argv[1];
     
-	printf("------------- I'm the Worker %ld ------------------------ \n", (long)getpid());
+	printf("-------------------------- I'm the Worker %ld ------------------------ \n", (long)getpid());
     
     printf("pipe: %s\n", pipename);
     
-    printf("worker-%d opening the fifo\n", getpid());
+    printf("worker-%d open the pipe\n", getpid());
     if( (fd = open(pipename, O_RDONLY))  < 0){
-        perror("worker: can't open fifo");
+        perror("worker: can't open pipe");
     }
 
     printf("worker-%d read\n", getpid());
