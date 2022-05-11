@@ -17,8 +17,6 @@
 #include <iostream>
 #include <queue>
 
-#include "ADTDeque.h"
-
 #define WORKERS "./workers"
 
 #define READ    0
@@ -50,7 +48,7 @@ char* takeFifo(pair<pid_t, char* > p){
 	return s;
 }
 
-int counter = 0;
+int counter = 1;
 
 int main(int argc, char **argv){
     
@@ -121,29 +119,30 @@ int main(int argc, char **argv){
             // }
             // else{
                 printf("We are making a new worker now\n");
-
+            
+                // naming the pipe
+                printf("counter = %d\n", counter);
+                sprintf(pipename, "worker-manager.pipe_%d", counter);
+                counter++;
+                printf("|||||||||||||||||||||||||||||||||||||||| pipe %s\n", pipename);
+                    
                 if( (child = fork()) < 0 ){ 
                     perror ("fork faild"); 
                     exit(EXIT_FAILURE);
                 }
                 
-                if(child > 0){
-                    printf("====================================================================\n");
-                    printf("------------------I'm the parent-manager\n");
+                // if(child > 0){
+                //     printf("====================================================================\n");
+                //     printf("------------------I'm the parent-manager\n");
                     
-                    sleep(1);
+                //     sleep(1);
                     
-                }
+                // }
                 if(child == 0){
 
                     printf("====================================================================\n");
                     printf("------------------Manager's worker\n");
 
-                    // naming the pipe
-                    sprintf(pipename, "worker-%d.pipe", counter);
-                    printf("|||||||||||||||||||||||||||||||||||||||| pipe %s\n", pipename);
-                    counter++;
-                    
                     // Create a namedpipe for the worker-manager connection
                     printf("start creating a pipe...\n");
                     if(mkfifo(pipename, 0666) == -1){
@@ -153,7 +152,7 @@ int main(int argc, char **argv){
                         }
                     }
                     printf("!!!! YOUR PIPE IS READY BITCH !!!! - %s\n", pipename);
-                    
+
                     printf("pushing worker: %d and his/her pipe: %s\n",getpid(), pipename);
                     queue_workers.push({getpid(), pipename});
                     
@@ -162,24 +161,19 @@ int main(int argc, char **argv){
                         perror("execl failed");
                         exit(EXIT_FAILURE);
                     }
-
                 }
-                
                 printf("====================================================================\n");
-                printf("----------------------i'm the parent again/ out of the if`s\n");
-
+                printf("------------------I'm the parent-manager\n");
+                    
+                    sleep(1);
                     // manager is opening the pipe so 
                     // so he can send the filename to the worker.
-                    printf("manager open the pipe- %s --- \n", pipename);
+                    printf("manager open the pipe- %s\n", pipename);
                     if((fd1 = open(pipename,O_WRONLY)) < 0){
                         perror("manager: can't open pipe");
                     }
-                
-                    // if(strcpy(buffer, buff)){
-                    //     printf("egine h antigrafh apo to ena buffer sto allo-- %s -- %s\n", buff, buffer);
-                    // }
-                    // printf("manager write to the pipe now!!!!\n");
-                    // write(fd1,buffer,BUFSIZ);   
+                    printf("manager write to the pipe now!!!!\n");
+                    write(fd1,buffer,BUFSIZ);   
 
             // }
                            
@@ -189,4 +183,3 @@ int main(int argc, char **argv){
 
 
 }
-
