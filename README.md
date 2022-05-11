@@ -1,10 +1,6 @@
 # k24-project1-2022
 //Anna Googula 115201800305
 
------------------
-// g++ -g -Wall manager.cpp -o sniffer 
-// g++ -g -Wall workers.cpp -o workers 
-// ./sniffer -p ./new_files
 ------------------
 
 * listener: it's a kids (pid) of manager process. Just executing (/callling) the inotifywait to keep an eye on the directory we want. 
@@ -17,3 +13,9 @@
 
 -------------------------------------------------
 __further observations__
+
+
+-----------------
+// g++ -g -Wall manager.cpp -o sniffer 
+// g++ -g -Wall workers.cpp -o workers 
+// ./sniffer -p ./new_files
