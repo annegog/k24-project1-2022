@@ -105,6 +105,7 @@ int main(int argc, char **argv){
             //????????
             // waitpid(-1, &status, WNOHANG | WUNTRACED)
             //??????????????????????????????????????
+
             // if(!queue_workers.empty() && signal(SIGCHLD, sig_handler)){
             //     // an yparxei diathesimow worker 
             //     // prepei na parw ayton = den ftiaxnw kainoyrgio worker
@@ -119,8 +120,7 @@ int main(int argc, char **argv){
             // else{
                 printf("We are making a new worker now\n");
             
-                // naming the pipe
-                printf("counter = %d\n", counter);
+                // naming the name pipe
                 sprintf(pipename, "worker-manager.pipe_%d", counter);
                 counter++;
                 printf("|||||||||||||||||||||||||||||||||||||||| pipe %s\n", pipename);
@@ -153,7 +153,8 @@ int main(int argc, char **argv){
                         exit(EXIT_FAILURE);
                     }
                 }
-                sleep(1);
+
+                //sleep(1);  // maybe we don't need this!!! Idon't know yet...
                 printf("====================================================================\n");
                 printf("------------------I'm the parent-manager\n");
                     
@@ -168,10 +169,11 @@ int main(int argc, char **argv){
                     if (write(fd1, buffer, manager_read) != manager_read){
                         perror("manager: write error");
                     }
-                    printf("helloooo\n");
                     if(manager_read < 0)
                         perror("manager: error!");
+                
                 }
+
 
 
             // }
