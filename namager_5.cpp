@@ -63,6 +63,8 @@ int main(int argc, char **argv){
     char buffer[BUFSIZ];
     char buff[BUFSIZ];
     int n;
+    char pipename[MAXBUFF];
+
     
     // char* dir_to_watch = argv[2];
     char* dir_to_watch = "./new_files";
@@ -123,16 +125,15 @@ int main(int argc, char **argv){
                     perror ("fork faild"); 
                     exit(EXIT_FAILURE);
                 }
-
-                // naming the pipe
-                char pipename[MAXBUFF];
-                sprintf(pipename, "worker_%d.pipe", getpid());
-                
                 if(child > 0){
                     printf("---------------------------I'm the parent-manager--------------------\n");
                 
-
+                    
                 }
+                // naming the pipe
+                sprintf(pipename, "worker_%d.pipe", getpid());
+                printf("||||||||||||||||--- pipe %s\n", pipename);
+                
                 if(child == 0){
                     
                     printf("----------------------- Manager's worker -------------------\n");
@@ -151,26 +152,27 @@ int main(int argc, char **argv){
                     queue_workers.push({getpid(), pipename});
                     
                     printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
-                    if(execl(WORKERS, WORKERS, pipename , NULL) < 0){
-                        perror("execl failed");
-                        exit(EXIT_FAILURE);
-                    }
+                    // if(execl(WORKERS, WORKERS, pipename , NULL) < 0){
+                    //     perror("execl failed");
+                    //     exit(EXIT_FAILURE);
+                    // }
 
                 }
-                printf(" AGAIN ----------------- i'm the parent-----------------\n");
+
+                printf("------------------------------- i'm the parent again --------------------------\n");
 
                     // manager is opening the pipe so 
                     // so he can send the filename to the worker.
-                    printf("manager open the pipe\n");
+                    printf("manager open the pipe %s\n", pipename);
                     if((fd1 = open(pipename,O_WRONLY)) < 0){
                         perror("manager: can't open pipe");
                     }
 
-                    if(strcpy(buffer, buff)){
-                        printf("m---- egine h antigrafh apo to ena buffer sto allo\n");
-                    }
-                    printf("manager write to the pipe now!!!!\n");
-                    write(fd1,buffer,BUFSIZ);   
+                    // if(strcpy(buffer, buff)){
+                    //     printf("egine h antigrafh apo to ena buffer sto allo-- %s -- %s\n", buff, buffer);
+                    // }
+                    // printf("manager write to the pipe now!!!!\n");
+                    // write(fd1,buffer,BUFSIZ);   
 
             // }
                            
