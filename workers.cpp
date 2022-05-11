@@ -33,7 +33,8 @@ int main(int argc, char **argv){
     }
     
     int fd;    
-    // char buff[BUFSIZ];
+    char buff[BUFSIZ];
+    int take;
     char* pipename = argv[1];
     
     printf("====================================================================\n");
@@ -46,11 +47,14 @@ int main(int argc, char **argv){
         perror("worker: can't open pipe");
     }
 
-    // read
+    printf("worker-%d read now\n", getpid());
+    while ( (take = read(fd, buff, MAXBUFF)) > 0){
+        // να βρω τα url ?? 
+        printf("worker is reading: %s", buff);
 
-    printf("worker-%d stop now, darling lalalalaalalalala\n", getpid());
+    }
 
-
+    printf("worker-%d stop, darling\n", getpid());
     printf("EXITING OF CHILD: %d \n", getpid());
 
     return 0;
