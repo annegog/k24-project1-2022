@@ -64,10 +64,9 @@ int main(int argc, char **argv){
     char buff[BUFSIZ];
     int n;
     char pipename[MAXBUFF];
-    char pname[MAXBUFF];
     
-    // char* dir_to_watch = argv[2];
-    char* dir_to_watch = "./new_files";
+    char* dir_to_watch = argv[2];
+    //char* dir_to_watch = "./new_files";
 
     queue <pair<pid_t, char*> > queue_workers;
     
@@ -129,7 +128,6 @@ int main(int argc, char **argv){
                 if(child > 0){
                     printf("====================================================================\n");
                     printf("------------------I'm the parent-manager\n");
-
                     //sleep(2);
                     
                 }
@@ -140,11 +138,8 @@ int main(int argc, char **argv){
 
                     // naming the pipe
                     sprintf(pipename, "worker_%d.pipe", getpid());
-                    printf("|||||||||||||||||||||||||||||||||||||||| pipe %s -- pipe %s\n", pipename, pname);
-    
-                    strcpy(pname,pipename);
-                    printf("------------------------- %s kai %s -----------\n", pipename, pname);
-
+                    printf("|||||||||||||||||||||||||||||||||||||||| pipe %s\n", pipename);
+                    
                     // Create a namedpipe for the worker-manager connection
                     printf("start creating a pipe...\n");
                     if(mkfifo(pipename, 0666) == -1){
@@ -153,9 +148,9 @@ int main(int argc, char **argv){
                             exit(6);
                         }
                     }
-                    printf("YOURE PIPE IS READY BITCH!!!! %s\n", pipename);
+                    printf("!!!! YOUR PIPE IS READY BITCH !!!! - %s\n", pipename);
                     
-                    printf("pushing worker-%d and his/her pipe:%s\n",getpid(), pipename);
+                    printf("pushing worker: %d and his/her pipe: %s\n",getpid(), pipename);
                     queue_workers.push({getpid(), pipename});
                     
                     printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
@@ -167,7 +162,7 @@ int main(int argc, char **argv){
                 }
                 
                 printf("====================================================================\n");
-                printf("----------------------i'm the parent again/ out of the ifs\n");
+                printf("----------------------i'm the parent again/ out of the if`s\n");
 
                     // manager is opening the pipe so 
                     // so he can send the filename to the worker.

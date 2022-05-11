@@ -36,7 +36,8 @@ int main(int argc, char **argv){
     // char buff[BUFSIZ];
     char* pipename = argv[1];
     
-	printf("-------------------------- I'm the Worker %ld ------------------------ \n", (long)getpid());
+    printf("====================================================================\n");
+	printf("----------------------------------I'm the Worker %ld\n", (long)getpid());
     
     printf("pipe: %s\n", pipename);
     
@@ -45,19 +46,15 @@ int main(int argc, char **argv){
         perror("worker: can't open pipe");
     }
 
-    printf("worker-%d read\n", getpid());
-    // while(( n = read(fd, buff, BUFSIZ)) ){
-    //     printf("worker-%d can read now\n", getpid());
-    // }
+    // read
 
-    printf("worker %d lalalalala\n", getpid());
-    
+    printf("worker-%d stop now, darling lalalalaalalalala\n", getpid());
+
+
+    printf("EXITING OF CHILD: %d \n", getpid());
+
     return 0;
-    //SIGSTOP;
-
-
-    // otan teleiwsei stelnei sigstop
-    //handler(SIGSTOP);
-
+                    
+    //kill(child,SIGSTOP);
 
 }
