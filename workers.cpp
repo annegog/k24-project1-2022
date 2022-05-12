@@ -14,12 +14,7 @@
 #include <semaphore.h>
 #include <sys/shm.h>
 
-#define MAXBUFF 1024
-
-#define SEM_NAME "semaphore1"
-#define SEM2_NAME "semaphore2"
-#define SEM3_NAME "semaphore3"
-
+#define MAXBUFF 2048
 
 void handler(int signum){
     signal(SIGSTOP, handler);
@@ -36,7 +31,7 @@ int main(int argc, char **argv){
     char buff[BUFSIZ];
     int take;
     char* pipename = argv[1];
-    
+        
     printf("====================================================================\n");
 	printf("----------------------------------I'm the Worker %ld\n", (long)getpid());
     
@@ -48,7 +43,7 @@ int main(int argc, char **argv){
     }
 
     printf("worker-%d read now\n", getpid());
-    while ( (take = read(fd, buff, MAXBUFF)) > 0){
+    while ( (take = read(fd, buff, BUFSIZ)) > 0){
         // να βρω τα url ?? 
         printf("worker is reading: %s", buff);
 
