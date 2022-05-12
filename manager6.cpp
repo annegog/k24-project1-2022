@@ -27,7 +27,6 @@
 
 using namespace std;
 
-
 int counter = 1;
 
 int main(int argc, char **argv){
