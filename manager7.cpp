@@ -30,10 +30,10 @@ using namespace std;
 
 int main(int argc, char **argv){
     
-    if(argc != 3){
-        fprintf(stderr,"Wrong arguments!\n");
-        exit(EXIT_FAILURE);
-    }
+    // if(argc != 3){
+    //     fprintf(stderr,"Wrong arguments!\n");
+    //     exit(EXIT_FAILURE);
+    // }
 
     pid_t pid, child;
     int fd[2], fd1;
@@ -42,7 +42,7 @@ int main(int argc, char **argv){
     char pipename[MAXBUFF];
     
     char* dir_to_watch = argv[2];
-    //char* dir_to_watch = "./new_files";
+    //char* dir_to_watch = "./";
 
     queue <pair<pid_t, char*> > queue_workers;
     
@@ -70,9 +70,9 @@ int main(int argc, char **argv){
         dup2(fd[READ], 0);
 
         while( (manager_read = read(fd[READ], buffer, MAXBUFF)) > 0){
-            printf("parent is reading: %s", buffer);
+            printf("parent is reading: %s!!!!!!!!!!!\n", buffer);
             strcpy(buffer, separeta(buffer));
-            printf("manager is reading: %s\n",buffer);
+            printf("manager is reading: %s!!!!!!!!!!!!!!!!\n",buffer);
 
             /////////////////////////////////////////
 
@@ -104,7 +104,7 @@ int main(int argc, char **argv){
                 // naming the name pipe
                 sprintf(pipename, "worker-manager.pipe_%d", counter);
                 counter++;
-                printf("|||||||||||||||||||||||||||||||||||||||| pipe %s\n", pipename);
+                printf("|||||||||||||||||||||||||||||||||||||||| pipe %s!!!!!!!!!!!!!!!!!\n", pipename);
                     
                 if( (child = fork()) < 0 ){ 
                     perror ("fork faild"); 
