@@ -12,6 +12,23 @@
 
 using namespace std;
 
+
+void sig_handler(int signum){
+    signal(SIGCHLD, sig_handler);
+}
+
+void child_handler(int signum){
+    signal(SIGCONT, child_handler);
+}
+void child1_handler(int signum){
+    signal(SIGSTOP, child1_handler);
+}
+void handler_1(int signum){
+    signal(SIGINT, handler_1);
+}
+
+
+
 char* takeFifo(pair<pid_t, char* > p){
 	// Gives second element from queue pair
 	char* s = p.second;
