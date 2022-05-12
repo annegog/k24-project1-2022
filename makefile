@@ -8,7 +8,7 @@ CC = g++
 CFLAGS = -Wall -Werror -g
 # Αρχεία .o
 OBJS = manager.o workers.o
-
+HEADER  = manager.h
 
 #all:$(OUT1) $(OUT2)
 
