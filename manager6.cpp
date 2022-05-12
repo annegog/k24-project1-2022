@@ -11,42 +11,22 @@
 #include <sys/ipc.h>
 #include <errno.h>
 #include <error.h>
-#include <semaphore.h>
 #include <sys/shm.h>
 
 #include <iostream>
 #include <queue>
+
+#include "manager.h"
 
 #define WORKERS "./workers"
 
 #define READ    0
 #define WRITE   1 
 
-#define MAXBUFF 1024
+#define MAXBUFF 2048
 
 using namespace std;
 
-
-void sig_handler(int signum){
-    signal(SIGCHLD, sig_handler);
-}
-
-void child_handler(int signum){
-    signal(SIGCONT, child_handler);
-}
-void child1_handler(int signum){
-    signal(SIGSTOP, child1_handler);
-}
-void handler_1(int signum){
-    signal(SIGINT, handler_1);
-}
-
-
-char* takeFifo(pair<pid_t, char* > p){
-	// Gives second element from queue pair
-	char* s = p.second;
-	return s;
-}
 
 int counter = 1;
 
@@ -92,8 +72,12 @@ int main(int argc, char **argv){
         close(fd[WRITE]);
         dup2(fd[READ], 0);
 
-        while( (manager_read = read(fd[READ], buffer, BUFSIZ)) > 0){
+        while( (manager_read = read(fd[READ], buffer, MAXBUFF)) > 0){
             printf("parent is reading: %s", buffer);
+            strcpy(buffer, separeta(buffer));
+            printf("manager is reading: %s\n",buffer);
+
+            /////////////////////////////////////////
 
             if(signal(SIGINT,handler_1)){
                 kill(child, SIGINT);
@@ -148,13 +132,13 @@ int main(int argc, char **argv){
                     queue_workers.push({getpid(), pipename});
                     
                     printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
-                    if(execl(WORKERS, WORKERS, pipename , NULL) < 0){
+                    if(execl("./workers", "workers", pipename, NULL) < 0){
                         perror("execl failed");
                         exit(EXIT_FAILURE);
                     }
                 }
 
-                //sleep(1);  // maybe we don't need this!!! Idon't know yet...
+                sleep(1);  // maybe we don't need this!!! Idon't know yet...
                 printf("====================================================================\n");
                 printf("------------------I'm the parent-manager\n");
                     
