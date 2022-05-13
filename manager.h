@@ -1,5 +1,5 @@
-#ifndef MANAGER
-#define MANAGER
+#ifndef MANAGER_H_
+#define MANAGER_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,30 +27,20 @@ void handler_1(int signum){
     signal(SIGINT, handler_1);
 }
 
-
-
-char* takeFifo(pair<pid_t, char* > p){
-	// Gives second element from queue pair
-	char* s = p.second;
-	return s;
-}
-
 char * separeta(char* buff){
-        char s[2] = " ";
-        char* token;
-        char *old = buff;
+    char s[2] = " ";
+    char* token;
+    char *old = buff;
    
-        /* get the first token */
-        token = strtok(buff, s);
-            
-        /* walk through other tokens */
-        while( token != NULL ) {
-            strcpy(old, token);
-            token = strtok(NULL, s);
-        }
-    return buff;
+    /* get the first token */
+    token = strtok(buff, s);            
+    /* walk through other tokens */
+    while( token != NULL ) {
+        strcpy(old, token);
+        token = strtok(NULL, s);
+    }
+    return old;
 }
-
 
 
 #endif
