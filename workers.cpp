@@ -14,13 +14,10 @@
 #include <semaphore.h>
 #include <sys/shm.h>
 
-#include "worker.h"
-
 #define MAXBUFF 2048
 #define BUFREAD 1024
 
 char* separate(char* );
-
 
 void handler(int signum){
     signal(SIGSTOP, handler);
@@ -34,7 +31,7 @@ int main(int argc, char **argv){
     }
     
     int fd;    
-    char buff[BUFSIZ];
+    char buff[BUFREAD];
     int take;
     char* pipename = argv[1];
 
@@ -46,51 +43,53 @@ int main(int argc, char **argv){
     char *new_token = buff_http;
     char s[10] = " ";
     char *ret;
-    //char out[BUFREAD];
-    char *out = "10.out";
-    int counter = 0;        
 
-    printf("====================================================================\n");
+    char out[BUFREAD];
+    int counter = 0;
+    
 	printf("----------------------------------I'm the Worker %ld\n", (long)getpid());
         
     printf("worker-%d open the pipe: %s\n", getpid(), pipename);
+    //opening the named-pipe
     if( (fd = open(pipename, O_RDONLY))  < 0){
         perror("worker: can't open pipe");
     }
     printf("worker-%d read now\n", getpid());
-    while( (take = read(fd, buff, BUFSIZ)) > 0){
-
-        /************************ Making the .out file*********************************/
-        
-        //sprintf(out, "%s.out", buff);
+    //reading what you reaceve from the parent-manager
+    while( (take = read(fd, buff, MAXBUFF)) > 0){
+    
+        /************************ Making the .out file******************************/
+        sprintf(out, "./out_files/%s.out", buff);   //all the path 
         FILE *out_file = fopen(out, "w"); // write only 
-        // test for files not existing. 
         if ( out_file == NULL){   
             printf("Error! Could not open file\n"); 
-            exit(-1); // must include stdlib.h 
+            exit(EXIT_FAILURE); 
         } 
-        fprintf(out_file, "The URLs are:\n"); // write to file
-
+        fprintf(out_file, "The URLs are:\n");
+    
         /*********************************************************/
-
+        
         printf("worker open the file: %s\n",buff);
-        if((read_file = open("./new_files/10.txt", O_RDONLY)) < 0){
+        // open the new file, to processed it 
+        if((read_file = open(buff, O_RDONLY)) < 0){
             perror("worker: can't open file");
             exit(EXIT_FAILURE);
         }
         printf("worker can read the file now!!!!\n"); 
         
+        /****************************************************/
+        // read every 1024 bytes from the file_name.txt
         while( read(read_file, buffer_file, BUFREAD) > 0){        
             // get the first token
             token = strtok(buffer_file, s);
             while( token != NULL ) {
-                ret = strstr(token, "http://"); //comp
-                if(ret){
+                ret = strstr(token, "http://"); // compare the token with the string
+                if(ret){    //found a "http://....."
                     counter++;
-                    strcpy(new_token,token);
+                    strcpy(new_token,token);    
                     // strcpy(new_token, separate(new_token)); printf("%s\n",new_token);
                     
-                    fprintf(out_file, "-- %s\n", new_token); // write to file 
+                    fprintf(out_file, "-- %s\n", new_token); // write the url file 
                 }
                 token = strtok(NULL, s);
             }
@@ -98,6 +97,8 @@ int main(int argc, char **argv){
         close(read_file);
         fprintf(out_file,"*Contains: %d*", counter);
         fclose(out_file);
+
+        /******************************************************/
 
         printf("worker-%d stop, darling\n", getpid());
         printf("EXITING OF CHILD: %d \n", getpid());
