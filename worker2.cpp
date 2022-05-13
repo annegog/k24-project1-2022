@@ -13,12 +13,9 @@
 #include <error.h>
 #include <semaphore.h>
 #include <sys/shm.h>
-#include <dirent.h>
 
 #define MAXBUFF 2048
 #define BUFREAD 1024
-
-using namespace std;
 
 char* separate(char* );
 
@@ -50,18 +47,19 @@ int main(int argc, char **argv){
     char out[BUFREAD];
     int counter = 0;
     
-    printf("====================================================================\n");
 	printf("----------------------------------I'm the Worker %ld\n", (long)getpid());
         
     printf("worker-%d open the pipe: %s\n", getpid(), pipename);
+    //opening the named-pipe
     if( (fd = open(pipename, O_RDONLY))  < 0){
         perror("worker: can't open pipe");
     }
     printf("worker-%d read now\n", getpid());
+    //reading what you reaceve from the parent-manager
     while( (take = read(fd, buff, MAXBUFF)) > 0){
     
         /************************ Making the .out file******************************/
-        sprintf(out, "./out_files/%s.out", buff);
+        sprintf(out, "./out_files/%s.out", buff);   //all the path 
         FILE *out_file = fopen(out, "w"); // write only 
         if ( out_file == NULL){   
             printf("Error! Could not open file\n"); 
@@ -72,6 +70,7 @@ int main(int argc, char **argv){
         /*********************************************************/
         
         printf("worker open the file: %s\n",buff);
+        // open the new file, to processed it 
         if((read_file = open(buff, O_RDONLY)) < 0){
             perror("worker: can't open file");
             exit(EXIT_FAILURE);
@@ -79,18 +78,18 @@ int main(int argc, char **argv){
         printf("worker can read the file now!!!!\n"); 
         
         /****************************************************/
-
+        // read every 1024 bytes from the file_name.txt
         while( read(read_file, buffer_file, BUFREAD) > 0){        
             // get the first token
             token = strtok(buffer_file, s);
             while( token != NULL ) {
-                ret = strstr(token, "http://"); //comp
-                if(ret){
+                ret = strstr(token, "http://"); // compare the token with the string
+                if(ret){    //found a "http://....."
                     counter++;
-                    strcpy(new_token,token);
+                    strcpy(new_token,token);    
                     // strcpy(new_token, separate(new_token)); printf("%s\n",new_token);
                     
-                    fprintf(out_file, "-- %s\n", new_token); // write to file 
+                    fprintf(out_file, "-- %s\n", new_token); // write the url file 
                 }
                 token = strtok(NULL, s);
             }

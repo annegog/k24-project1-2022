@@ -24,10 +24,11 @@
 #define WRITE   1 
 
 #define MAXBUFF 2048
-
 #define NAMESBUFF 1024
 
 using namespace std;
+
+queue <pair<pid_t, char*> > queue_workers;
 
 
 int main(int argc, char **argv){
@@ -46,8 +47,7 @@ int main(int argc, char **argv){
     //char* dir_to_watch = argv[2];
     char dir_to_watch[15] = "./";
 
-    queue <pair<pid_t, char*> > queue_workers;
-
+    int status;
     ///////////////////////// Listener and Manager /////////////////////////////
 
     if(pipe(fd) == -1){ 
@@ -153,6 +153,7 @@ int main(int argc, char **argv){
                     if(manager_read < 0)
                         perror("manager: error!");
                 }
+                
             // }          
         } 
         

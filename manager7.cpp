@@ -24,10 +24,11 @@
 #define WRITE   1 
 
 #define MAXBUFF 2048
-
 #define NAMESBUFF 1024
 
 using namespace std;
+
+queue <pair<pid_t, char*> > queue_workers;
 
 void manager_messege(char*, char* , int, int);
 
@@ -47,7 +48,6 @@ int main(int argc, char **argv){
     //char* dir_to_watch = argv[2];
     char dir_to_watch[15] = "./";
 
-    queue <pair<pid_t, char*> > queue_workers;
     int status;
 
     ///////////////////////// Listener and Manager /////////////////////////////
@@ -162,17 +162,15 @@ int main(int argc, char **argv){
                     manager_messege(pipename, file_name, manager_read, fd1);
                 }
 
-
             }
-            
-            while (!queue_workers.empty()){
+       
+        } 
+
+        while (!queue_workers.empty()){
                 queue_workers.pop();
             }
-                      
-        } 
-        
+              //να κλείσω fifo και δεν ξερω τι αλλο     
                    
-
     }
     close(fd[1]);
     close(fd[2]);
