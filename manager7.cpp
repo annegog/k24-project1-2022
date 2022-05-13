@@ -25,6 +25,8 @@
 
 #define MAXBUFF 2048
 
+#define NAMESBUFF 1024
+
 using namespace std;
 
 
@@ -37,14 +39,21 @@ int main(int argc, char **argv){
 
     pid_t pid, child;
     int fd[2], fd1;
-    char buffer[MAXBUFF];
+    char buffer[MAXBUFF] = "\0";
     int manager_read, counter = 1;
-    char pipename[MAXBUFF];
-    
-    char* dir_to_watch = argv[2];
-    //char* dir_to_watch = "./";
+    char pipename[NAMESBUFF];
+
+    //char* dir_to_watch = argv[2];
+    char dir_to_watch[15] = "./new_files";
 
     queue <pair<pid_t, char*> > queue_workers;
+
+    // Creating a directory
+    // if (mkdir("pipes", 0777) == -1)
+    //     cerr << "Error :  " << strerror(errno) << endl;
+    // else
+    //     cout << "Directory created\n";
+
     
     ///////////////////////// Listener and Manager /////////////////////////////
 
@@ -73,7 +82,6 @@ int main(int argc, char **argv){
             printf("parent is reading: %s!!!!!!!!!!!\n", buffer);
             strcpy(buffer, separeta(buffer));
             printf("manager is reading: %s!!!!!!!!!!!!!!!!\n",buffer);
-
             /////////////////////////////////////////
 
             if(signal(SIGINT,handler_1)){
