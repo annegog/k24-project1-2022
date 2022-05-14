@@ -31,13 +31,8 @@ using namespace std;
 queue <pair<pid_t, char*> > queue_workers;
 
 
-int main(int argc, char **argv){
+int main(){
     
-    // if(argc != 3){
-    //     fprintf(stderr,"Wrong arguments!\n");
-    //     exit(EXIT_FAILURE);
-    // }
-
     pid_t pid, child;
     int fd[2], fd1;
     char buffer[NAMESBUFF];
@@ -71,9 +66,10 @@ int main(int argc, char **argv){
 
         while( (manager_read = read(fd[READ], buffer, MAXBUFF)) > 0){
 
-            if(signal(SIGINT,handler_1)){
+            if(signal(SIGINT, sig_handler)){
                 kill(child, SIGINT);
             }
+
             //sleep(2);
 
             /****************************************************/
@@ -85,25 +81,25 @@ int main(int argc, char **argv){
 
             /****************************************************/
 
+            // catch the signal of a stopped child
             signal(SIGSTOP,child1_handler);
             
             // ????????????????????????????????
             // ????????
             // waitpid(-1, &status, WNOHANG | WUNTRACED)
             // ??????????????????????????????????????
-
+            
             if( child = waitpid(-1, &status, WNOHANG | WUNTRACED)){
                 // if there is a available worker
                 // I'm giving him the file to proccesse it
                 // don't make a new worker
-
-                signal(SIGCONT, child_handler);
-
+                
                 // seek for the child that is available
                 while(!queue_workers.empty()){
                     if(child == takeChild(queue_workers.front())){
                         printf("------------------ %d",getpid());
 
+                        signal(SIGCONT, child_handler);
 
                         // the pipe (it's supposed to be)/(is already) open now. 
                         // So we just give the file name
@@ -171,5 +167,6 @@ int main(int argc, char **argv){
     close(fd[1]);
     close(fd[2]);
 
+    return 0;
 }
 
