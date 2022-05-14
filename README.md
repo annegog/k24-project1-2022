@@ -4,10 +4,10 @@ Anna Googula 115201800305
 ------------------
 * manager/ manager.cpp: 
     - he is taking as an input a string, that contains the filename. We separate the file name.
-    The manager is looking for available workers, and if he found one he gives him the job. But, if he doesn't find anyone, he is making a new worker.
+    The manager is looking for available workers, and if he finds one he gives him the job. But, if he doesn't find anyone, he makes a new worker.
     Making a __new worker__ (initially, the manager is making workers/childs) 
         1) we make a name for the pipe
-        2) creating a named pipe
+        2) creating a named pipe/ fifo.
         3) push in the queue the worker and the pipename (we use it for the available workers).
         4) exec the child-manager
         5) we open the pipe from the parent side so that the manager can send the file name to the worker (with the pipe).
@@ -18,10 +18,10 @@ Anna Googula 115201800305
     - The worker opens the pipe and waits to read from the manager.
         1) We make a .out file for the filename that the worker reads,
         2) open the file and reads bytes to bytes. We separate every word we read and if we find a string that matched the "http://" string we keep it
-        3) ???? Now we parse the URL when we found a "/". The second string is the one that we want. We saved it και τωρα πρεπει να ξεσωρισουμε τα www. αν υπάρχουν.
+        3) ???? Now we parse the URL when we find a "/". The second string is the one that we want. We save it και τωρα πρεπει να ξεσωρισουμε τα www. αν υπάρχουν.
         4) We write to the file_name.out the domains/
         5) close the file we were reading, close the .out file and 
-        be stopped so the parent knows! 
+        When it's stops send a signal to the parent! 
 * listener: it's a kid (pid) of manager process. Just executing (/calling) the inotifywait to keep an eye on the current directory. 
 -------------------------------------------------
 __further observations__
