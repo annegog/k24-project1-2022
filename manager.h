@@ -33,7 +33,7 @@ void handler_1(int signum){
 
 // The manager can write to the pipe.
 void manager_messege(char* file_name, int manager_read, int fd1){
-    printf("manager write to the pipe now!!!!\n");
+    //printf("manager write to the pipe now!!!!\n");
     if (write(fd1, file_name, manager_read) != manager_read){
         perror("manager: write error");
     }

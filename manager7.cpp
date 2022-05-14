@@ -30,7 +30,6 @@ using namespace std;
 
 queue <pair<pid_t, char*> > queue_workers;
 
-void manager_messege(char*, char* , int, int);
 
 int main(int argc, char **argv){
     
@@ -45,9 +44,6 @@ int main(int argc, char **argv){
     int manager_read, counter = 1;
     char pipename[NAMESBUFF];
     
-    //char* dir_to_watch = argv[2];
-    char dir_to_watch[15] = "./";
-
     int status;
 
     ///////////////////////// Listener and Manager /////////////////////////////
@@ -64,7 +60,7 @@ int main(int argc, char **argv){
     if(pid == 0){         // child and Listener 
         close(fd[READ]);
         dup2(fd[WRITE], 1); // the (new)standrad output => goes to the input of manager
-        if( execl("/usr/bin/inotifywait","usr/bin/inotifywait", "-m", "-e", "create", "-e", "moved_to", dir_to_watch, NULL) < 0){
+        if( execl("/usr/bin/inotifywait","usr/bin/inotifywait", "-m", "-e", "create", "-e", "moved_to", "./", NULL) < 0){
             perror("execl-(listener) failed");
             exit(EXIT_FAILURE);
         }
@@ -117,8 +113,8 @@ int main(int argc, char **argv){
 
             }
             else{
-                // naming the name pipe, with the path (go to the folder)
-                sprintf(pipename, "./pipes/worker-manager.pipe_%d", counter);
+                // naming the name pipe, with the path so it goes to the temporary 
+                sprintf(pipename, "/tmp/worker-manager.pipe_%d", counter);
                 counter++;
                 // creating a child-worker                    
                 if( (child = fork()) < 0 ){ 
@@ -126,7 +122,7 @@ int main(int argc, char **argv){
                     exit(EXIT_FAILURE);
                 }
                 if(child == 0){
-                    printf("---------------------Manager's worker\n");
+                    //printf("---------------------Manager's worker\n");
                     
                     // Create a namedpipe for the worker-manager connection
                     printf("start creating a pipe...\n");
@@ -139,10 +135,10 @@ int main(int argc, char **argv){
                     
                     /****************************************************/
                     // pushing the worker and the pipename in the queue
-                    printf("pushing worker: %d and his/her pipe: %s\n",getpid(), pipename);
+                    //printf("pushing worker: %d and his/her pipe: %s\n",getpid(), pipename);
                     queue_workers.push({getpid(), pipename});
                     
-                    printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
+                    //printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
                     if(execl(WORKERS, WORKERS, pipename, NULL) < 0){
                         perror("execl failed");
                         exit(EXIT_FAILURE);
@@ -150,16 +146,16 @@ int main(int argc, char **argv){
                 }
 
                 sleep(1);  // maybe we don't need this!!! I don't know yet...
-                printf("------------------I'm the parent-manager\n");
+                //printf("------------------I'm the parent-manager\n");
 
                 // manager is opening the pipe so 
                 // so he can send the file name to the worker
-                printf("manager open the pipe- %s\n", pipename);
+                //printf("manager open the pipe- %s\n", pipename);
                 if((fd1 = open(pipename,O_WRONLY)) < 0){
                     perror("manager: can't open pipe");
                 }
                 else{
-                    manager_messege(pipename, file_name, manager_read, fd1);
+                    manager_messege(file_name, manager_read, fd1);
                 }
 
             }

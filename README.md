@@ -2,7 +2,6 @@
 //Anna Googula 115201800305
 
 ------------------
-
 * manager/ manager.cpp: 
     - he is taking as an input a string, that contains the filename. We separate the file name.
     The manager is looking for available workers, and if he found one he gives him the job. But, if he doesn't find anyone, he is making a new worker.
@@ -13,7 +12,8 @@
         4) exec the child-manager
         5) we open the pipe from the parent side so that the manager can send the file name to the worker (with the pipe).
     - ???????? When the manager wants to stop the program, we have to close the fifos, pop the queue, and ???
-
+* manager.h: 
+    - function manager_messege: takes the fifoname and he is writing to the pipe
 * workers/ workers.cpp:
     - The worker opens the pipe and waits to read from the manager.
         1) We make a .out file for the filename that the worker reads,
@@ -22,16 +22,13 @@
         4) We write to the file_name.out the domains/
         5) close the file we were reading, close the .out file and 
         be stopped so the parent knows! 
-
-* listener: it's a kid (pid) of manager process. Just executing (/calling) the inotifywait to keep an eye on the directory we want. 
-
+* listener: it's a kid (pid) of manager process. Just executing (/calling) the inotifywait to keep an eye on the current directory. 
 -------------------------------------------------
 __further observations__
-* manager.h: 
-    - function manager_messege: takes the fifoname and he is writing to the pipe
+
 
 -----------------
 * Makefile is a pice of shit :)
-// g++ -g -Wall manager.cpp -o sniffer 
-// g++ -g -Wall workers.cpp -o workers 
-// ./sniffer -p ./new_files/
+g++ -g -Wall manager.cpp -o sniffer 
+g++ -g -Wall workers.cpp -o workers 
+./sniffer -p ./new_files/

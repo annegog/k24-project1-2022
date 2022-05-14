@@ -12,13 +12,10 @@ HEADER  = manager.h
 
 
 # Το εκτελέσιμο πρόγραμμα
-EXEC = manager
-
-# path
-DIR = ./new_files/
+EXEC = sniffer
 
 # Παράμετροι για δοκιμαστική εκτέλεση
-ARGS = -p $(DIR)
+#ARGS = 
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $(EXEC)
@@ -28,7 +25,7 @@ clean:
 	rm -f $(OBJS) $(EXEC) $(OUT1) $(OUT2)
 
 run: $(EXEC)
-	./$(EXEC) $(ARGS)
+	./$(EXEC)
 
 valgrind: $(EXEC)
 	valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=all ./$(EXEC) $(ARGS)
