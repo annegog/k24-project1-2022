@@ -20,7 +20,17 @@
 char* separate(char* );
 char* separate_w(char* );
 
+void catchinterrupt(int signo){
+    if (signo == 2){
+        printf("Child:%d I caught a SIGINT\n",getpid());
+        kill(getpid(),SIGINT);
+	}
+    printf("Catching: returning\n");
+}
+
+
 void handler(int signum){
+    printf("This is a handler in a worker// Stop the child\n");
     signal(SIGSTOP, handler);
 }
 
@@ -89,7 +99,7 @@ int main(int argc, char **argv){
                     counter++;
                     new_token = token;   
                     pr = separate(new_token); 
-                    printf("%s\n",pr);
+                    //printf("%s\n",pr);
                     fprintf(out_file, "-- %s\n", pr); // write the url file 
                 }
                 token = strtok(NULL, s);
@@ -97,19 +107,17 @@ int main(int argc, char **argv){
         }
         close(read_file);
         fprintf(out_file,"*Contains: %d*", counter);
-        printf("*Contains: %d*", counter);
         fclose(out_file);
 
         /******************************************************/
 
-        printf("worker-%d stop, darling\n", getpid());
-        //printf("EXITING OF CHILD: %d \n", getpid());
-
-    }
-    // close file
-    //kill(child,SIGSTOP); 
-    return 0;
+        //printf("worker-%d stop, darling\n", getpid());
+        printf("EXITING OF CHILD: %d \n", getpid());
+        exit(EXIT_SUCCESS);
+        return 0;
+    } 
 }
+
 
 char* separate(char* http){
     char s[2] = "/";

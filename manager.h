@@ -16,17 +16,17 @@ using namespace std;
 /*********************** Manager's handlers ******************/
 
 void sig_handler(int signum){
+    printf("-- Inside a handler// Stop the prorgam now! Kill your childs now\n");
     signal(SIGCHLD, sig_handler);
 }
 
 void child_handler(int signum){
+    printf("-- Inside a handler// Continue to the child\n");
     signal(SIGCONT, child_handler);
 }
 void child1_handler(int signum){
+    printf("-- Inside a handler// The child is stopped\n");
     signal(SIGSTOP, child1_handler);
-}
-void handler_1(int signum){
-    signal(SIGINT, handler_1);
 }
 
 /***********************************************************/
@@ -54,6 +54,27 @@ int takeChild(pair<pid_t, char* > p){
 	// Gives first element from queue pair
 	int s = p.first;
 	return s;
+}
+
+void printPair(pair<pid_t, char* > p){
+	// Gives first element from queue pair
+	pid_t f = p.first;
+	// Gives second element from queue pair
+	char* s = p.second;
+    printf("reeeeeeeeeeeeeeeeee\n");
+	cout << "(" << f << ", " << s << ") ";
+}
+
+// Print the Queue of Pairs
+void showQueue(queue<pair<pid_t, char*> > oyra){
+	// Print element until the
+	// queue is not empty
+    printf("ela kalh moy oyraaaaaaaa\n");
+	while (!oyra.empty()) {
+		printPair(oyra.front());
+		oyra.pop();
+	}
+	cout << '\n';
 }
 
 /*******************************************************/

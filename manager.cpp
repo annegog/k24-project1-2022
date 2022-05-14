@@ -31,23 +31,16 @@ using namespace std;
 queue <pair<pid_t, char*> > queue_workers;
 
 
-int main(int argc, char **argv){
+int main(){
     
-    // if(argc != 3){
-    //     fprintf(stderr,"Wrong arguments!\n");
-    //     exit(EXIT_FAILURE);
-    // }
-
     pid_t pid, child;
     int fd[2], fd1;
     char buffer[NAMESBUFF];
     int manager_read, counter = 1;
     char pipename[NAMESBUFF];
     
-    //char* dir_to_watch = argv[2];
-    char dir_to_watch[15] = "./";
-
     int status;
+
     ///////////////////////// Listener and Manager /////////////////////////////
 
     if(pipe(fd) == -1){ 
@@ -62,7 +55,7 @@ int main(int argc, char **argv){
     if(pid == 0){         // child and Listener 
         close(fd[READ]);
         dup2(fd[WRITE], 1); // the (new)standrad output => goes to the input of manager
-        if( execl("/usr/bin/inotifywait","usr/bin/inotifywait", "-m", "-e", "create", "-e", "moved_to", dir_to_watch, NULL) < 0){
+        if( execl("/usr/bin/inotifywait","usr/bin/inotifywait", "-m", "-e", "create", "-e", "moved_to", "./", NULL) < 0){
             perror("execl-(listener) failed");
             exit(EXIT_FAILURE);
         }
@@ -72,7 +65,15 @@ int main(int argc, char **argv){
         dup2(fd[READ], 0);
 
         while( (manager_read = read(fd[READ], buffer, MAXBUFF)) > 0){
+
+            if(signal(SIGINT, sig_handler)){
+                kill(child, SIGINT);
+            }
+
             //sleep(2);
+
+            /****************************************************/
+
             char* file_name = separeta(buffer);
             int len = strcspn(file_name,"\n");
             file_name[len] = '\0';
@@ -80,32 +81,36 @@ int main(int argc, char **argv){
 
             /****************************************************/
 
-            if(signal(SIGINT,handler_1)){
-                kill(child, SIGINT);
-            }
-
+            // catch the signal of a stopped child
             signal(SIGSTOP,child1_handler);
             
-            ////????????????????????????????????
-            //????????
+            // ????????????????????????????????
+            // ????????
             // waitpid(-1, &status, WNOHANG | WUNTRACED)
-            //??????????????????????????????????????
-
-            // if(!queue_workers.empty() && signal(SIGCHLD, sig_handler)){
-            //     // an yparxei diathesimow worker 
-            //     // prepei na parw ayton = den ftiaxnw kainoyrgio worker
-                
-            //     signal(SIGCONT, child_handler);
-
-            //     // if((fd1 = open(,O_WRONLY)) < 0){
-            //     //     perror("manager: can't open pipe");
-            //     // }
-
-            // }
-            // else{
+            // ??????????????????????????????????????
             
-                // naming the name pipe, with the path (go to the folder)
-                sprintf(pipename, "./pipes/worker-manager.pipe_%d", counter);
+            if( child = waitpid(-1, &status, WNOHANG | WUNTRACED)){
+                // if there is a available worker
+                // I'm giving him the file to proccesse it
+                // don't make a new worker
+                
+                // seek for the child that is available
+                while(!queue_workers.empty()){
+                    if(child == takeChild(queue_workers.front())){
+                        printf("------------------ %d",getpid());
+
+                        signal(SIGCONT, child_handler);
+
+                        // the pipe (it's supposed to be)/(is already) open now. 
+                        // So we just give the file name
+                        manager_messege(file_name, manager_read, fd1);
+                    }
+                }
+
+            }
+            else{
+                // naming the name pipe, with the path so it goes to the temporary 
+                sprintf(pipename, "/tmp/worker-manager.pipe_%d", counter);
                 counter++;
                 // creating a child-worker                    
                 if( (child = fork()) < 0 ){ 
@@ -113,7 +118,7 @@ int main(int argc, char **argv){
                     exit(EXIT_FAILURE);
                 }
                 if(child == 0){
-                    printf("---------------------Manager's worker\n");
+                    //printf("---------------------Manager's worker\n");
                     
                     // Create a namedpipe for the worker-manager connection
                     printf("start creating a pipe...\n");
@@ -126,10 +131,10 @@ int main(int argc, char **argv){
                     
                     /****************************************************/
                     // pushing the worker and the pipename in the queue
-                    printf("pushing worker: %d and his/her pipe: %s\n",getpid(), pipename);
+                    //printf("pushing worker: %d and his/her pipe: %s\n",getpid(), pipename);
                     queue_workers.push({getpid(), pipename});
                     
-                    printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
+                    //printf("execl the worker %d -- pipe:%s\n", getpid(), pipename);
                     if(execl(WORKERS, WORKERS, pipename, NULL) < 0){
                         perror("execl failed");
                         exit(EXIT_FAILURE);
@@ -137,29 +142,31 @@ int main(int argc, char **argv){
                 }
 
                 sleep(1);  // maybe we don't need this!!! I don't know yet...
-                printf("------------------I'm the parent-manager\n");
-                    
+                //printf("------------------I'm the parent-manager\n");
+
                 // manager is opening the pipe so 
-                // so he can send the file name to the worker.
-                printf("manager open the pipe- %s\n", pipename);
+                // so he can send the file name to the worker
+                //printf("manager open the pipe- %s\n", pipename);
                 if((fd1 = open(pipename,O_WRONLY)) < 0){
                     perror("manager: can't open pipe");
                 }
                 else{
-                    printf("manager write to the pipe now!!!!\n");
-                    if (write(fd1, file_name, manager_read) != manager_read){
-                        perror("manager: write error");
-                    }
-                    if(manager_read < 0)
-                        perror("manager: error!");
+                    manager_messege(file_name, manager_read, fd1);
                 }
-                
-            // }          
+
+            }
+       
         } 
-        
+
+        while (!queue_workers.empty()){
+                queue_workers.pop();
+            }
+              //να κλείσω fifo και δεν ξερω τι αλλο     
                    
-
     }
+    close(fd[1]);
+    close(fd[2]);
 
-
+    return 0;
 }
+
