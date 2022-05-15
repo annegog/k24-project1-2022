@@ -63,7 +63,6 @@ int main(int argc, char **argv){
     }
     //reading what you reaceve from the parent-manager
     while( (take = read(fd, buff, MAXBUFF)) > 0){
-        
         /************************ Making the .out file******************************/
         sprintf(out, "./out_files/%s.out", buff);   //all the path 
         FILE *out_file = fopen(out, "w"); // write only 
@@ -133,7 +132,6 @@ char* separate_w(char* http){
 
     for( int i=0; i < 3; i++) {
         //strcpy(url, temp);    
-        printf("%s -- %s ---%s\n", url, temp,http);
         url = strtok(NULL, s);
     }
     //printf("%s \n",url);

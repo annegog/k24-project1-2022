@@ -8,7 +8,8 @@
 #include <sys/shm.h>
 
 #include <iostream>
-#include <queue>
+#include <deque>
+#include <algorithm>
 
 using namespace std;
 
@@ -17,15 +18,6 @@ using namespace std;
 void sig_handler(int signum){
     printf("-- Inside a handler// Stop the prorgam now! Kill your childs now\n");
     signal(SIGCHLD, sig_handler);
-}
-
-void child_handler(int signum){
-    printf("-- Inside a handler// Continue to the child\n");
-    signal(SIGCONT, child_handler);
-}
-void child1_handler(int signum){
-    printf("-- Inside a handler// The child is stopped\n");
-    signal(SIGSTOP, child1_handler);
 }
 
 /***********************************************************/
@@ -41,36 +33,18 @@ void manager_messege(char* file_name, int manager_read, int fd1){
 }
 
 
-/************* Queue  ***************/
-
-char* takeFifo(pair<pid_t, char* > p){
-	// Gives second element from queue pair
-	char* s = p.second;
-	return s;
+/************* Deque  ***************/
+void showdq(deque<char*> g){
+	deque<char*>::iterator it;
+	for (it = g.begin(); it != g.end(); ++it)
+		cout << '\t' << *it;
+	cout << '\n';
 }
 
-int takeChild(pair<pid_t, char* > p){
-	// Gives first element from queue pair
-	int s = p.first;
-	return s;
-}
-
-void printPair(pair<pid_t, char* > p){
-	// Gives first element from queue pair
-	pid_t f = p.first;
-	// Gives second element from queue pair
-	char* s = p.second;
-	cout << "(" << f << ", " << s << ") ";
-}
-
-// Print the Queue of Pairs
-void showQueue(queue<pair<pid_t, char*> > oyra){
-	// Print element until the
-	// queue is not empty
-	while (!oyra.empty()) {
-		printPair(oyra.back());
-		//oyra.pop();
-	}
+void showdq2(deque<int> g){
+	deque<int>::iterator it;
+	for (it = g.begin(); it != g.end(); ++it)
+		cout << '\t' << *it;
 	cout << '\n';
 }
 
