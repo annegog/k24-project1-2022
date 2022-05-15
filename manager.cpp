@@ -13,9 +13,9 @@
 #include <error.h>
 #include <sys/shm.h>
 
-#include <iostream>
-#include <queue>
 #include <deque>
+#include <iostream>
+#include <algorithm>
 
 #include "manager.h"
 
@@ -29,14 +29,14 @@
 
 using namespace std;
 
-queue <pair<pid_t, char*>> queue_workers;
+deque <char* > pipe_list;
+deque <int > workers_child;
 
 
 void catchinterrupt(int signo){
     if (signo == 2){
-        printf("I caught a SIGINT\n");
+        //printf("I caught a SIGINT\n");
 	}
-    printf("Catching: returning\n");
 }
 
 int main(int argc, char **argv){
@@ -51,7 +51,8 @@ int main(int argc, char **argv){
     char buffer[NAMESBUFF];
     int manager_read, counter = 1;
     char pipename[NAMESBUFF];
-    
+    //int pos;
+
     int status;
 
     /************************* Listener and Manager *****************/
@@ -86,10 +87,6 @@ int main(int argc, char **argv){
             sigaction(SIGINT, &act, NULL);
             sigaction(SIGSTOP, &act, NULL);
             
-            // if(signal(SIGINT, sig_handler)){
-            //     kill(child, SIGINT);
-            // }
-
             //sleep(1);
             /****************************************************/
             //separeting the string we getting from the listener
@@ -98,44 +95,45 @@ int main(int argc, char **argv){
             file_name[len] = '\0';
             printf("manager is reading: %s\n",file_name);
 
-            /****************************************************/
-
-            // catch the signal of a stopped child
-            
+            /****************************************************/            
             // supposedly here we're looking for the available childs 
             // BUUUUUT I didn't do it! (I tried) ->*
             /*
             pid_t child_pid;
-            if( child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED) > 0){
+            if( (child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0){
                 // if there is an available worker
                 // I'm giving him the file to proccesse it
                 // don't make a new worker
-                
-                // signal(SIGCONT, child_handler);
-                if(execl(WORKERS, WORKERS, takeFifo(queue_workers.front()), NULL) < 0){
+                printf("----- I found an availanle child:%d", getppid());
+                auto it = std::find(workers_child.begin(), workers_child.end(), getpid());
+                if(it != workers_child.end()){
+                    pos = it - workers_child.begin();
+                    printf("In the position: %d\n", pos);
+                }
+                else{
+                    printf("Coudn't find the worker\n");
+                }
+                if(execl(WORKERS, WORKERS, pipe_list.at(pos), NULL) < 0){
                     perror("execl failed");
                     exit(EXIT_FAILURE);
                 }
                 // the pipe (it's supposed to be)/(is already) open now. We don't need to make another  
-                manager_messege(takeFifo(queue_workers.front()), manager_read, fd1);
+                manager_messege(pipe_list.at(pos), manager_read, fd1);
 
             }
             else{
             */
             // ->* So everytime we have a new file, we're making a new worker :(
-
                 // naming the name pipe, with the path so it goes to the temporary 
                 sprintf(pipename, "/tmp/worker-manager.pipe_%d", counter);
                 counter++;
                 // creating a child-worker  
-                printf("make a child\n");                  
                 if( (child = fork()) < 0 ){ 
                     perror ("fork faild"); 
                     exit(EXIT_FAILURE);
                 }
                 if(child == 0){                    
                     // Create a namedpipe for the worker-manager connection
-                    printf("start creating a pipe...\n");
                     if(mkfifo(pipename, 0666) == -1){
                         if( errno != EEXIST ){
                             perror("manager: mkfifo error");
@@ -144,7 +142,8 @@ int main(int argc, char **argv){
                     }
                     /****************************************************/
                     // pushing the worker and the pipename in the queue and execute the child
-                    queue_workers.push(pair <pid_t, char*>(getpid(),pipename));
+                    pipe_list.push_back(pipename);
+                    workers_child.push_back(getpid());
                     if(execl(WORKERS, WORKERS, pipename, NULL) < 0){
                         perror("execl failed");
                         exit(EXIT_FAILURE);
@@ -161,21 +160,20 @@ int main(int argc, char **argv){
                     // write in the fifo/ pipe.
                     manager_messege(file_name, manager_read, fd1);
                 }
-            //}
+            // }
         } 
         
-        printf("Out of the while read\n");
         while(waitpid(-1, &status, WNOHANG)){
-            printf("kill the child:%d", getpid());
             kill(getpid(),SIGHUP);
         }
-        printf("Your childs are DEAD!\n");
-        while (!queue_workers.empty()){
-            printf("Empty the queue\n");
-            queue_workers.pop();
+        while(!workers_child.empty()){
+            workers_child.pop_front();
         }
-              //να κλείσω fifo και δεν ξερω τι αλλο     
-                   
+        deque<char*>::iterator it;
+	    for (it = pipe_list.begin(); it != pipe_list.end(); ++it){
+            unlink(*it);
+            pipe_list.pop_front();
+        }
     }
     close(fd[1]);
     close(fd[2]);
