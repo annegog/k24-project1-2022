@@ -12,7 +12,6 @@
 
 using namespace std;
 
-
 /*********************** Manager's handlers ******************/
 
 void sig_handler(int signum){
@@ -31,7 +30,7 @@ void child1_handler(int signum){
 
 /***********************************************************/
 
-// The manager can write to the pipe.
+// Manager write to the pipe.
 void manager_messege(char* file_name, int manager_read, int fd1){
     //printf("manager write to the pipe now!!!!\n");
     if (write(fd1, file_name, manager_read) != manager_read){
@@ -61,7 +60,6 @@ void printPair(pair<pid_t, char* > p){
 	pid_t f = p.first;
 	// Gives second element from queue pair
 	char* s = p.second;
-    printf("reeeeeeeeeeeeeeeeee\n");
 	cout << "(" << f << ", " << s << ") ";
 }
 
@@ -69,10 +67,9 @@ void printPair(pair<pid_t, char* > p){
 void showQueue(queue<pair<pid_t, char*> > oyra){
 	// Print element until the
 	// queue is not empty
-    printf("ela kalh moy oyraaaaaaaa\n");
 	while (!oyra.empty()) {
-		printPair(oyra.front());
-		oyra.pop();
+		printPair(oyra.back());
+		//oyra.pop();
 	}
 	cout << '\n';
 }
