@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 
         /******************************************************/
 
-        printf("EXITING OF CHILD: %d \n", getpid());
+        //printf("EXITING OF CHILD: %d \n", getpid());
         _exit(EXIT_SUCCESS);
     }
     return 0;
