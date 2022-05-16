@@ -23,11 +23,12 @@ Anna Googula 115201800305
         5) close the file we were reading, close the .out file and 
         When it's stops send a signal to the parent! 
 * listener: it's a child (pid) of manager process. Just executing (/calling) the inotifywait to keep an eye on the current directory (we putting the new files here).
-* finder.sh: 
--------------------------------------------------
-__further observations__
+
+-----------------------------------------------------------------------------------------------------------
+*Further observations*
+- finder.sh: sniffer doesn't output the "location num_of_appearances" but the finder can find the numbers for the TLDs.
 - the pipes are open until the end.
-- Makefile is a pice of shit :) You can do this instead
+- Makefile is not working :) You can do this instead: 
 g++ -g -Wall manager.cpp -o sniffer 
 g++ -g -Wall workers.cpp -o workers 
 ./sniffer
