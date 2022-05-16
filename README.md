@@ -11,7 +11,7 @@ Anna Googula 115201800305
         3) push in the queue the worker and the pipename (we use it for the available workers).
         4) exec the child-manager
         5) we open the pipe from the parent side so that the manager can send the file name to the worker (with the pipe).
-    - ???????? When the manager wants to stop the program, we have to close the fifos, pop the queue, and ???
+    - When the manager wants to stop the program, we close the fifos, pop the deqeus.
 * manager.h: 
     - function manager_messege: takes the fifoname and he is writing to the pipe
 * workers/ workers.cpp:
