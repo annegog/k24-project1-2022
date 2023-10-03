@@ -30,7 +30,8 @@ Purpose: Creating processes using the fork/exec system calls, interprocess commu
 *Further observations*
 - finder.sh: sniffer doesn't output the "location num_of_appearances" but the finder can find the       numbers for the TLDs (if we put a right file :)).
 - the pipes are open until the end.
-- Makefile is not working :) You can do this instead: 
-g++ -g -Wall manager.cpp -o sniffer 
-g++ -g -Wall workers.cpp -o workers 
-./sniffer
+- Makefile is not working :) You can do this instead:
+  
+    - g++ -g -Wall manager.cpp -o sniffer 
+    - g++ -g -Wall workers.cpp -o workers
+    - ./sniffer
