@@ -2,6 +2,7 @@
 Anna Googula
 
 Purpose: Creating processes using the fork/exec system calls, interprocess communication through pipes and named pipes, using low-level I/O, handling signals, and creating a shell script.
+* The manager sends information to the worker about which file to process. The worker's goal is to open the file and search for URLs using low-level I/O. These files are text files that may contain plain text and URLs. The search is limited to URLs that use the http protocol, specifically those starting with "http://" and ending with a space character. For each URL found, the worker extracts the location information without the "www" prefix. During the reading process, the worker creates a file in which it records all the detected locations along with their occurrence count. The output file must have the same name as the input file with a ".out" extension. Finally, the worker informs the manager that it has finished and is available.
 
 ------------------
 * manager/ manager.cpp: 
