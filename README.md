@@ -1,6 +1,8 @@
 ### k24-project1-2022
 Anna Googula
 
+Purpose: Creating processes using the fork/exec system calls, interprocess communication through pipes and named pipes, using low-level I/O, handling signals, and creating a shell script.
+
 ------------------
 * manager/ manager.cpp: 
     - he is taking as an input a string, that contains the filename. We separate the file name.
